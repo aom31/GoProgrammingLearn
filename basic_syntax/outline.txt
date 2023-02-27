@@ -1,0 +1,11 @@
+-variable
+-if statement
+-array
+-slice
+-for loop
+-map
+-function
+-package
+-pointer
+-struct
+-method
