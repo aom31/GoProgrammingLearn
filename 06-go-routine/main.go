@@ -5,67 +5,38 @@ import (
 	"time"
 )
 
+const NumberWorker = 10
+
 func main() {
-	workerCount := 10
 
-	// #send response from channel to main line routine
-	//1. use channel to receive data from go routine
-	// receive data from go routine back to main routine
+	//1 worker 10 num work with routine and send response to channelpipe
+	//then read data from channel pipe in main routine
+	responsechannelForWorkpipe := make(chan string)
+	for i := 0; i < NumberWorker; i++ {
+		workerId := fmt.Sprintf("worker ID=%v \n", i+1)
 
-	//step 1 make channel by make(chan type-DatasendinChannel)
-	responseChannel := make(chan string)
-	//step2 make worker 10 and return response each worker id
-	for i := 0; i < workerCount; i++ {
-		workerID := fmt.Sprintf("worker-%v", i)
-		go worker1(workerID, responseChannel)
+		go workerCall(workerId, responsechannelForWorkpipe)
+	}
+	for i := 0; i < NumberWorker; i++ {
+		responseReturntoMain := <-responsechannelForWorkpipe
+		fmt.Println(responseReturntoMain)
 	}
 
-	//step3 read response receive from channel worker id
-	for i := 0; i < workerCount; i++ {
-		readResponse := <-responseChannel
-		fmt.Println(readResponse)
+	fmt.Println("=========")
+	//2 send data from main to channel
+	//if receive signal then exit work
+	for i := 0; i < NumberWorker; i++ {
+		exitSignal := fmt.Sprintf("worker exist ID=%v", i+1)
+		mainRoutineWork(exitSignal, responsechannelForWorkpipe)
 	}
 
-	//step4 close channel when not use
-	close(responseChannel)
-	fmt.Println("All response from channel returned")
-
-
-	// 2# send data from main routine to go channel all
-	existChannelFromMain := make(chan bool)
-	for i:=0;i<workerCount;i++{
-		workerID := fmt.Sprintf("worker-%v",i)
-		go worker3(workerID, existChannelFromMain)
-	}
-	time.Sleep(10* time.Second)
-	for i:=0;i< workerCount;i++{
-		existChannelFromMain <- true
-	}
-	close(existChannelFromMain)
-	time.Sleep(2*time.Second)
-	fmt.Println("Main channel routine is exited")
-
+}
+func mainRoutineWork(signalToexist string, channelpipe chan string) {
 
 }
 
-func worker3(workerID string, existChannelFromMain chan bool){
-	i := 0
-	for  {
-		i++
-		select {
-		case <- existChannelFromMain :
-				fmt.Println(fmt.Sprintf(" worker-%v has exited",workerID))
-				return
-		default:
-			fmt.Println(fmt.Sprintf("woker= %v, couter=%v", workerID,i))
-			time.Sleep(1*time.Second)	
-		}
-	}
-}
+func workerCall(workerId string, responsechannelForWorkpipe chan string) {
+	time.Sleep(1 + time.Second)
+	responsechannelForWorkpipe <- workerId + "response"
 
-func worker1(workerID string, responseChannel chan string) {
-	//simulate request latency
-	time.Sleep(1 * time.Second)
-	//send data to channel
-	responseChannel <- (workerID + "Response")
 }

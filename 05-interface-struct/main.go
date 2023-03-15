@@ -25,6 +25,8 @@ type ICitizenService interface {
 // the service to work with citizen data
 type ThaiCitizenService struct {
 }
+type JapanCitizenService struct {
+}
 
 // 4 create constructor for CitizenService use New+ Name-struct-object
 // constructor is  function use for create object
@@ -33,9 +35,20 @@ func NewThaiCitizenService() *ThaiCitizenService {
 	return &ThaiCitizenService{}
 }
 
-//3 declare function method in interface
-//And function in interface will be method of struct
-//use func (struct for object) Namefunction(input) output{}
+func NewJapanCitizenService() *JapanCitizenService {
+	return &JapanCitizenService{}
+}
+
+// 3 declare function method in interface
+// And function in interface will be method of struct
+// use func (struct for object) Namefunction(input) output{}
+func (svc *JapanCitizenService) Validate(c *Citizen) bool {
+	return len(c.Firstname) > 0 && len(c.Lastname) > 0 && len(c.CitizenID) > 0
+}
+func (svc *JapanCitizenService) CreateCitizenCard(c *Citizen) error {
+	fmt.Printf("Successfully  create japan citizen card for ID= %s \n", c.CitizenID)
+	return nil
+}
 
 // เป็นวิธีการ ผูกฟังก์ชั่น เพื่อเป็น method ของ struct
 func (svc *ThaiCitizenService) Validate(c *Citizen) bool {
@@ -44,7 +57,7 @@ func (svc *ThaiCitizenService) Validate(c *Citizen) bool {
 }
 
 func (svc *ThaiCitizenService) CreateCitizenCard(c *Citizen) error {
-	//TODO: request API to create citizen card
+	//: request API to create citizen card
 	fmt.Printf("Successfully create thai citizen card for ID=%s \n", c.CitizenID)
 	return nil
 }
@@ -55,8 +68,8 @@ func main() {
 
 	//step1 constructor function will return struct pointer
 	citizen := NewCitizen("Thamakorn", "ketnoi", "1249949492009")
-	citizenSvc := NewThaiCitizenService()
-
+	//citizenSvc := NewThaiCitizenService()
+	citizenSvc := NewJapanCitizenService()
 	//step2 function that accept interface, the argrument must implement function declare in interface
 	err := CreateCitizenCard(citizenSvc, citizen)
 	if err != nil {
